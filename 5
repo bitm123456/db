@@ -1,0 +1,86 @@
+create table constituency(cons_id number(20) primary key,csname varchar(20),csstate varchar(20),no_of_voters number(10));
+
+create table party(pid number(20) primary key,pname varchar(20),psymbol varchar(10));
+
+create table candidates(cand_id number(12) primary key,phone_no number(10),age number(2),state varchar(20),name varchar(20),pid int references party(pid));
+
+create table contest(cons_id number(20) references constituency(cons_id),cand_id number(12) references candidates(cand_id),primary key(cons_id,cand_id));
+                     
+create table voter(vid number(20) primary key,vname varchar(20),vage number(5),vaddr varchar(20),cons_id number(20) references constituency(cons_id),cand_id number(12) references candidates(cand_id));
+
+insert into constituency values(111,'rajajinagar','karnataka',4);
+insert into constituency values(444,'anagar','kerala',1);
+insert into constituency values(555,'tnagar','karnataka',4);
+insert into constituency values(999,'anagar','kerala',1);
+insert into constituency values(333,'anagar','kerala',1);
+                               
+insert into party values(898,'bjp','lotus');
+insert into party values(899,'congress','hand');
+
+insert into candidates values(198,999999999,23,'kerala','raksha',898);
+insert into candidates values(199,888888888,21,'karnataka','rakhi',899);
+
+insert into contest values(111,198);
+insert into contest values(444,198);
+insert into contest values(444,199);
+
+insert into voter values(901,'prasad',19,'kanakpura',111,198);
+insert into voter values(903,'aa',19,'kanakpura',444,199);
+insert into voter values(904,'dd',21,'ramnagar',444,199);
+insert into voter values(905,'tt',21,'mandya',444,199);
+
+
+
+1. 
+select c.cand_id,cd.name,count(c.cons_id) from contest c,candidates cd where
+c.cand_id=cd.cand_id group by(cd.name,c.cand_id) having count(c.cons_id)>1;
+
+2.
+select csstate,count(cons_id) from constituency group by csstate order by
+count(cons_id);
+
+3.
+create   procedure agechecking ( id in number,age in number)
+    as
+    BEGIN
+    if age>18 then
+    insert into voter(vid,vage) values (id,age);
+    else
+    dbms_output.put_line('age should be high');
+    end if;
+    end agechecking;
+   /
+
+   set serveroutput on;
+   exec agechecking (25,21);
+
+   exec agechecking (20,15);
+
+   select * from voter;
+
+  4.
+   SELECT csname, csstate, no_of_voters,
+    RANK () OVER (partition BY csstate order by no_of_voters desc) AS Rank_No
+    FROM constituency;
+
+    5.
+    create  trigger count
+    after insert on voter
+    for each row
+    begin
+    update constituency
+    set no_of_voters = no_of_voters + 1
+    where cons_id=:new.cons_id;
+    end count;
+    /
+    
+    select * from constituency;
+
+    select * from constituency;
+
+
+
+
+
+
+
