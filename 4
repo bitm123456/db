@@ -1,0 +1,131 @@
+CREATE TABLE Student
+(Usn VARCHAR(20) PRIMARY KEY,
+Sname VARCHAR(20) NOT NULL,
+Address VARCHAR(20), Phone NUMBER(10),
+Gender VARCHAR(2));
+
+CREATE TABLE Semsec
+(Ssid NUMBER(10) PRIMARY KEY,Sem NUMBER(10),
+Sec VARCHAR(10));
+
+CREATE TABLE CLASS
+(Usn VARCHAR(20) REFERENCES Student(Usn),Ssid NUMBER(10)	REFERENCES Semsec(Ssid),PRIMARY KEY(Usn,Ssid));
+
+CREATE TABLE Subject
+(Subcode VARCHAR(20) PRIMARY KEY,Sub_title VARCHAR(20) NOT NULL,Sem NUMBER(10),Credits NUMBER(10));
+
+
+CREATE TABLE IAmarks
+(Usn VARCHAR(20),
+Subcode VARCHAR(20) REFERENCES Subject(Subcode),
+Ssid NUMBER(10),
+Test1 NUMBER(10),
+Test2 NUMBER(10),
+Test3 NUMBER(10),
+Finalia NUMBER(6,2), PRIMARY KEY(Usn,Subcode,Ssid),
+FOREIGN KEY(Usn,Ssid)REFERENCES Class(Usn,Ssid));
+
+
+INSERT INTO Student VALUES ('3br15cs001','priya','gandhinagar',97689989,'F');
+INSERTINTOStudentVALUES('3br15cs002','poonam','sanjaynagar',977868239,'F');
+INSERT INTO Student VALUES('3br15cs003','prem','mvcolony',899999989,'M');
+INSERT INTO Student VALUES('3br15cs004','preetham','5krishna',989864489,'M');
+INSERT INTO Student VALUES('3br15cs005','prerana','gandhinagar',987577989,'F');
+INSERT INTO Student VALUES('3br15cs007','neha','11mhcolony',987577989,'F');
+INSERT INTO Student VALUES ('3br15cs008','aarav','Sansad Marg', 987577989,'M');
+INSERT INTO Student VALUES ('3br15cs009','aarush','Lodhi Road', 987577989,'M');
+INSERT INTO Student VALUES ('3br15cs011','dhanya','Palam Marg', 987577989,'F');
+
+
+INSERT INTO Semsec VALUES(11,1,'A');
+INSERT INTO Semsec VALUES(12,5,'B');
+INSERT INTO Semsec VALUES(13,7,'A');
+INSERT INTO Semsec VALUES(14,7,'B');
+INSERT INTO Semsec VALUES(15,5,'A');
+INSERT INTO Semsec VALUES(18,4,'C');
+INSERT INTO Semsec VALUES(17,1,'B');
+INSERT INTO Semsec VALUES(21,8,'A');
+INSERT INTO Semsec VALUES(29,5,'B');
+INSERT INTO Semsec VALUES(31,7,'C');
+INSERT INTO Semsec VALUES(19,7,'C');
+
+
+
+INSERT INTO Class VALUES('3br15cs001',11);
+INSERT INTO Class VALUES('3br15cs002',12);
+INSERT INTO Class VALUES('3br15cs003',13);
+INSERT INTO Class VALUES('3br15cs004',14);
+INSERT INTO Class VALUES('3br15cs005',15);
+INSERT INTO Class VALUES('3br15cs005',18);
+INSERT INTO Class VALUES('3br15cs004',18);
+INSERT INTO Class VALUES('3br15cs008',17);
+INSERT INTO Class VALUES('3br15cs009',21);
+INSERT INTO Class VALUES('3br15cs011',29);
+INSERT INTO Class VALUES('3br15cs011',11);
+INSERT INTO Class VALUES('3br15cs001',17);
+INSERT INTO Class VALUES('3br15cs002',29);
+INSERT INTO Class VALUES('3br15cs003',12);
+INSERT INTO Class VALUES('3br15cs004',13);
+INSERT INTO Class VALUES('3br15cs005',14);
+INSERT INTO Class VALUES('3br15cs008',11);
+INSERT INTO Class VALUES('3br15cs001',13);
+INSERT INTO Class VALUES('3br15cs004',15);
+INSERT INTO Class VALUES('3br15cs011',21);
+INSERT INTO Class VALUES('3br15cs009',29);
+
+
+INSERT INTO Subject VALUES('15cs01','dbms',5,4);
+
+INSERT INTO Subject VALUES('15cs02','os',7,4);
+
+INSERT INTO Subject VALUES('15cs03','ss',5,4);
+
+INSERT INTO Subject VALUES('15cs04','c',1,8);
+
+INSERT INTO Subject VALUES('15cs05','cn',7,8);
+
+
+
+INSERT INTO IAmarks VALUES('3br15cs001','15cs01',11,11,12,13,NULL);
+INSERT INTO IAmarks VALUES('3br15cs002','15cs02',12,19,12,13,NULL);
+
+INSERT INTO IAmarks VALUES('3br15cs003','15cs03',13,11,19,20,NULL);
+
+INSERT INTO IAmarks VALUES('3br15cs004','15cs04',14,19,12,18,NULL);
+
+INSERT INTO IAmarks VALUES('3br15cs005','15cs05',15,19,18,19,NULL);
+
+INSERT INTO IAmarks VALUES('3br15cs005','15cs05',18,11,13,19,NULL);
+
+
+
+1. 
+SELECT s.Usn,s.Sname,s.Address,s.Phone
+FROM Student s,Semsec n, Class c
+WHERE n.Sem=4 and n.Sec='C' and s.Usn=c.Usn and c.Ssid=n.Ssid;
+
+2. 
+
+SELECT c.Ssid, Sec section, Sem semester,
+SUM(CASE WHEN s.Gender='M' THEN 1 ELSE 0 END) AS MALE,
+SUM(CASE WHEN s.Gender='F' THEN 1 ELSE 0 END ) AS FEMALE
+FROM Class c, Student s, Semsec m
+WHERE s.Usn=c.Usn AND m.Ssid=c.Ssid GROUP BY c.Ssid, Sem, Sec;
+
+3. 
+CREATE VIEW Test1_Marks AS
+SELECT test1 FROM IAmarks WHERE usn='3br15cs005'
+
+4. UPDATE iamarks SET finalia= (GREATEST(test1+test2,test2+test3,test3+test1))/2;
+
+5. 
+SELECT i.usn,i.test1,i.test2,i.test3,i.finalia,
+
+(CASE WHEN i.finalia>=17 AND i.finalia<=20 THEN 'outstanding' WHEN i.finalia>=12 AND i.finalia<=17 THEN 'average'
+WHEN i.finalia>12 THEN 'weak'
+ELSE 'invalid'
+END) AS grade
+
+FROM IAmarks i,Class c, Semsec s
+
+WHERE i.usn=c.usn AND c.ssid=s.ssid AND s.sem=8 and s.sec IN('A','B','C')
